@@ -1,0 +1,17 @@
+#joints #rods
+
+joint 1 axis minimum_angle maximum_angle
+joint 2 axis minimum_angle maximum_angle
+joint 3 axis minimum_angle maximum_angle
+.
+.
+.
+joint n axis minimum_angle maximum_angle
+
+rod 1 length width height
+rod 2 length width height
+rod 3 length width height
+.
+.
+.
+rod m length width height
