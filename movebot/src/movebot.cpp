@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
     std::string arm_description_file = input_dir + "/" + "arm_description.txt";
     std::string start_end_file = input_dir + "/" + "start_end.txt";
     std::string output_file = output_dir + "/" + "path.txt";
+    std::string obstacles_file = input_dir + "/" + "obstacles.txt";
     int max_iterations = 1000;
     int reach_threshold = 5;
     if (argc > 1) {
@@ -55,10 +56,13 @@ int main(int argc, char *argv[]) {
         output_file = argv[3];
     }
     if(argc > 4){
-        max_iterations = std::stoi(argv[4]);
+        obstacles_file = argv[4];   
     }
     if(argc > 5){
-        reach_threshold = std::stoi(argv[5]);
+        max_iterations = std::stoi(argv[5]);
+    }
+    if(argc > 6){
+        reach_threshold = std::stoi(argv[6]);
     }
 
     // ---------------------- Read arm information ----------------------
@@ -83,7 +87,7 @@ int main(int argc, char *argv[]) {
     in.close();
     // ------------------------------------------------------------------
 
-    arm.printInfo();
+    // arm.printInfo();
 
     // ---------------------- Read start and end configuration ----------------------
     in.open(start_end_file);
@@ -108,6 +112,42 @@ int main(int argc, char *argv[]) {
     std::cout << RED << BOLD << "end at : " << NONE << goal;
     // ------------------------------------------------------------------
 
+    // ---------------------- Read obstacles ----------------------
+    in.open(obstacles_file);
+    if(in.fail()){
+        std::cerr << "Error opening input file: " << obstacles_file << std::endl;
+        return 1;
+    }
+    int obstacles_number;
+    in >> obstacles_number;
+    std::cout << "obstacles_number: " << obstacles_number << std::endl;
+    std::vector<Rectangle> obstacles(obstacles_number);
+    for(int i=0; i < obstacles_number; i++){
+        double length, width, height;
+        double x, y, z;
+        in >> length >> width >> height >> x >> y >> z;
+        Rectangle rect(length, width, height);
+        rect.center = Point(x, y, z);
+        rect.bottom_center = Point(x, y, z - height / 2);
+        rect.top_center = Point(x, y, z + height / 2);
+        rect.side_vector = Vec3(1.0, 0.0, 0.0);
+        obstacles[i] = rect;
+        // std::cout << rect;
+    }
+    // ------------------------------------------------------------
+    // std::cout << "++++++++++\n";
+    // for(int i=0; i<obstacles.size(); i++){
+    //     std::cout << obstacles[i];
+    // }
+    // std::cout << "++++++++++\n";
+
+    if(arm.collisionDetection(start, obstacles)){
+        std::cout << RED << BOLD << "Start configuration is in collision!" << NONE << std::endl;
+    }else{
+        std::cout << GREEN << BOLD << "Start configuration is valid!" << NONE << std::endl;
+    }
+
+    // arm.printPosture(start);
 
     Configuration current = start;
     int steps = 0;
@@ -127,6 +167,11 @@ int main(int argc, char *argv[]) {
             double step = ((double)diff.joint_angles[i] / norm) * rrt.step_size;
             int moved = std::round(step);
             qNew.joint_angles[i] = qNearest.joint_angles[i] + moved;
+        }
+
+        if(arm.collisionDetection(qNew, obstacles)){
+            std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
+            continue;
         }
 
         if(rrt.isExist(qNew)){
@@ -167,9 +212,18 @@ int main(int argc, char *argv[]) {
     std::cout << "max_iterations: " << max_iterations << std::endl;
     std::cout << "reach_threshold: " << reach_threshold << std::endl;
 
+    arm.calculatePosture(goal);
+    arm.printPosture(goal);
+    
+
     // for(auto i:rrt.tree){
     //     std::cout << i;
     // }
+
+
+
+
+
 
     
 

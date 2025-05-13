@@ -19,6 +19,12 @@ class Arm{
 
         void initialize(int joint_number, int rod_number);
         void printInfo();
+
+        void calculatePosture(Configuration &config);
+
+        void printPosture(Configuration &config);
+
+        bool collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles);
 };
 
 #endif

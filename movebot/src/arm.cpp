@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <iostream>
 #include <sstream>
+#include <cmath>
 // #include <regex>
 
 Arm::Arm(int joint_number, int rod_number) {
@@ -122,4 +123,80 @@ void Arm::printInfo(){
     }
     std::cout << outter_boarder << std::endl;
     std::cout << std::endl;
+}
+
+void Arm::calculatePosture(Configuration &config) {
+    Point last_top_center(0, 0, 0);
+    rods[0].bottom_center = last_top_center;
+    rods[0].top_center = Point(0, 0, rods[0].height);
+    rods[0].center = static_cast<Point>((static_cast<Vec3>(rods[0].bottom_center) + static_cast<Vec3>(rods[0].top_center)) * 0.5);
+
+
+    int xy_rotation_angle = config.joint_angles[0];
+    int z_rotation_angle;
+
+    if(this->axis[0] == "x"){
+        z_rotation_angle = config.joint_angles[1];
+    }else{
+        z_rotation_angle = 180 - config.joint_angles[1];
+    }
+
+    rods[0].side_vector = Vec3(sin(RAD(xy_rotation_angle)), -cos(RAD(xy_rotation_angle)), 0);
+
+    
+    
+    for(int i=1; i<rod_number-1; i++){
+        // std::cout << "i: " << i << std::endl;
+        // std::cout << "axis: " << this->axis[i] << std::endl;
+        // std::cout << "joint_angles: " << config.joint_angles[i] << std::endl;
+        if(i!=1){
+            if(this->axis[i] == "x"){
+                z_rotation_angle = z_rotation_angle - (90 - config.joint_angles[i]);
+            }else if(this->axis[i] == "-x"){
+                z_rotation_angle = z_rotation_angle - (90 - (180 - config.joint_angles[i]));
+            }
+        }
+        this->rods[i].bottom_center = this->rods[i-1].top_center;
+        Vec3 bottom_center = static_cast<Vec3>(rods[i].bottom_center);
+        Vec3 local_top_center = Vec3(this->rods[i].height * cos(RAD(z_rotation_angle)) * cos(RAD(xy_rotation_angle)), 
+                                                     this->rods[i].height * cos(RAD(z_rotation_angle)) * sin(RAD(xy_rotation_angle)), 
+                                                     this->rods[i].height * sin(RAD(z_rotation_angle)));
+        this->rods[i].top_center = static_cast<Point>(bottom_center + local_top_center);
+        this->rods[i].side_vector = this->rods[0].side_vector;
+        this->rods[i].center = static_cast<Point>((static_cast<Vec3>(rods[i].bottom_center) + static_cast<Vec3>(rods[i].top_center)) * 0.5);
+    }
+
+    this->rods[rod_number-1].bottom_center = this->rods[rod_number-2].top_center;
+    Vec3 bottom_center = static_cast<Vec3>(rods[rod_number-1].bottom_center);
+    Vec3 direction = normalize(static_cast<Vec3>(rods[rod_number-2].top_center) - static_cast<Vec3>(rods[rod_number-2].bottom_center));
+
+    Vec3 local_top_center = direction * this->rods[rod_number-1].height;
+    this->rods[rod_number-1].top_center = static_cast<Point>(bottom_center + local_top_center);
+    this->rods[rod_number-1].side_vector = this->rods[0].side_vector; // TODO: fix this
+    rods[rod_number-1].center = static_cast<Point>((static_cast<Vec3>(rods[rod_number-1].bottom_center) + static_cast<Vec3>(rods[rod_number-1].top_center)) * 0.5);
+}
+
+void Arm::printPosture(Configuration &config) {
+    calculatePosture(config);
+    std::cout << "Posture:" << std::endl;
+    for(int i=0; i<rod_number; i++){
+        std::cout << "Rod " << i+1 << ": ";
+        std::cout << rods[i].bottom_center << " -> " << rods[i].top_center;
+        std::cout << " | Center: " << rods[i].center;
+        std::cout << " | Side vector: " << rods[i].side_vector;
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+bool Arm::collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles) {
+    calculatePosture(config);
+    for(auto &obstacle : obstacles){
+        for(auto &rod : rods){
+            if(cuboidCuboidCollisionDetection(rod, obstacle)){
+                return true;
+            }
+        }
+    }
+    return false;
 }
