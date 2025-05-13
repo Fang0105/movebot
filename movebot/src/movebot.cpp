@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     in.close();
     // ------------------------------------------------------------------
 
-    // arm.printInfo();
+    arm.printInfo();
 
     // ---------------------- Read start and end configuration ----------------------
     in.open(start_end_file);
@@ -141,11 +141,11 @@ int main(int argc, char *argv[]) {
     // }
     // std::cout << "++++++++++\n";
 
-    if(arm.collisionDetection(start, obstacles)){
-        std::cout << RED << BOLD << "Start configuration is in collision!" << NONE << std::endl;
-    }else{
-        std::cout << GREEN << BOLD << "Start configuration is valid!" << NONE << std::endl;
-    }
+    // if(arm.collisionDetection(start, obstacles)){
+    //     std::cout << RED << BOLD << "Start configuration is in collision!" << NONE << std::endl;
+    // }else{
+    //     std::cout << GREEN << BOLD << "Start configuration is valid!" << NONE << std::endl;
+    // }
 
     // arm.printPosture(start);
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
         }
 
         if(arm.collisionDetection(qNew, obstacles)){
-            std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
+            // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
             continue;
         }
 
@@ -212,8 +212,8 @@ int main(int argc, char *argv[]) {
     std::cout << "max_iterations: " << max_iterations << std::endl;
     std::cout << "reach_threshold: " << reach_threshold << std::endl;
 
-    arm.calculatePosture(goal);
-    arm.printPosture(goal);
+    // arm.calculatePosture(goal);
+    // arm.printPosture(goal);
     
 
     // for(auto i:rrt.tree){

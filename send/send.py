@@ -26,3 +26,9 @@ for line in f.readlines():
     line = line.strip()
     line = line[1:-1]
     angles = line.split(", ")
+
+    send_angles(angles)
+    time.sleep(0.2)
+
+print("send 300!!")
+send_a_number('300')

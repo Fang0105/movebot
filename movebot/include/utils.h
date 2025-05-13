@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <iostream>
+#include <array>
+#include <cmath>
 
 #define RED "\e[0;31m"
 #define NONE "\e[0m"
