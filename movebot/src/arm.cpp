@@ -200,3 +200,36 @@ bool Arm::collisionDetection(Configuration &config, std::vector<Rectangle> &obst
     }
     return false;
 }
+
+bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG) {
+    // A = [a1, a2, a3, a4, a5]
+    // B = [b1, b2, b3, b4, b5]
+    // check [a1~b1, a2~b2, a3~b3, a4~b4, a5~b5]
+    Configuration diff = B - A;
+
+    // 計算從 A 到 B 所需的最大角度差距
+    int max_step = 0;
+    for (int i = 0; i < diff.joint_number; ++i) {
+        max_step = std::max(max_step, std::abs(diff.joint_angles[i]));
+    }
+
+    // 沿著 A → B 的方向，每一步角度變化為 1 單位地插值並檢查
+    for (int step = 0; step <= max_step; ++step) {
+        Configuration current = A;
+        for (size_t i = 0; i < current.joint_number; ++i) {
+            // 線性插值：整數步進
+            current.joint_angles[i] = A.joint_angles[i] + std::round((double)(B.joint_angles[i] - A.joint_angles[i]) * step / max_step);
+        }
+
+        if(DEBUG){
+            std::cout << "Checking configuration: " << current << std::endl;
+        }
+        // 檢查這個中間姿態是否碰撞
+        if (collisionDetection(current, obstacles)) {
+            return false;
+        }
+    }
+
+    return true;  // 全部合法
+    
+}

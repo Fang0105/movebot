@@ -169,8 +169,12 @@ int main(int argc, char *argv[]) {
             qNew.joint_angles[i] = qNearest.joint_angles[i] + moved;
         }
 
-        if(arm.collisionDetection(qNew, obstacles)){
-            // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
+        // if(arm.collisionDetection(qNew, obstacles)){
+        //     // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
+        //     continue;
+        // }
+        if(!arm.motionValidation(current, qNew, obstacles)){
+            // std::cout << "qNew: " << qNew << " -> Motion validation failed!" << std::endl;
             continue;
         }
 
@@ -221,7 +225,7 @@ int main(int argc, char *argv[]) {
     // }
 
 
-
+    // arm.motionValidation(path[0], path[1], obstacles, true);
 
 
 
