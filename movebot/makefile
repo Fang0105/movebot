@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -O2 -std=c++17 -Iinclude
+CXXFLAGS = -Wall -std=c++17 -Iinclude
 TARGET = movebot
 SRC_DIR = src
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
