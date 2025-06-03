@@ -20,7 +20,7 @@ def send_angles(angles):
         send_a_number(str(num))
 
 
-f = open("../movebot/output/path.txt", mode="r")
+f = open("../vamp/output/path.txt", mode="r")
 
 for line in f.readlines():
     line = line.strip()
