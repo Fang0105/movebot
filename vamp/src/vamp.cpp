@@ -132,11 +132,11 @@ int main(int argc, char *argv[]) {
     
     
     // ------------------------------------------------------------
-    std::cout << "++++++++++\n";
-    for(int i=0; i<obstacles.size(); i++){
-        std::cout << obstacles[i];
-    }
-    std::cout << "++++++++++\n";
+    // std::cout << "++++++++++\n";
+    // for(int i=0; i<obstacles.size(); i++){
+    //     std::cout << obstacles[i];
+    // }
+    // std::cout << "++++++++++\n";
 
     // if(arm.collisionDetection(start, obstacles)){
     //     std::cout << RED << BOLD << "Start configuration is in collision!" << NONE << std::endl;
@@ -146,10 +146,12 @@ int main(int argc, char *argv[]) {
 
     // arm.printPosture(start);
 
+
+    
     Configuration current = start;
     int steps = 0;
     while(reach(current, goal, reach_threshold)==false && steps < max_iterations){
-        std::cout << "Iteration: " << steps << std::endl;
+        // std::cout << "Iteration: " << steps << std::endl;
         Configuration qRandom = sampleAConfiguration(goal);
         Configuration qNearest = rrt.findNearest(qRandom);
         Configuration qNew(arm.joint_number);
@@ -167,17 +169,15 @@ int main(int argc, char *argv[]) {
             qNew.joint_angles[i] = qNearest.joint_angles[i] + moved;
         }
 
-        std::cout << "qNearest: " << qNearest;
+        // std::cout << "qNearest: " << qNearest;
 
         // if(arm.collisionDetection(qNew, obstacles)){
         //     // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
         //     continue;
         // }
         if(!arm.motionValidation(qNearest, qNew, obstacles)){
-            std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
+            // std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
             continue;
-        }else{
-            std::cout << "qNew: " << qNew << " -> Motion validation passed!" << std::endl;
         }
 
         if(rrt.isExist(qNew)){
@@ -226,8 +226,13 @@ int main(int argc, char *argv[]) {
     //     std::cout << i;
     // }
 
+    
 
     // arm.motionValidation(path[0], path[1], obstacles, true);
+    
+    // Configuration c(5, {0, 90, 0, 0, 90});
+    // std::vector<Configuration> tem(4, c);
+    // arm.batchCollisionDetection(tem, obstacles, true);
 
 
 

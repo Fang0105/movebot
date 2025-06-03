@@ -358,6 +358,10 @@ bool Arm::batchSphereCollisionDetection(float32x4_t v_top_center[3], float32x4_t
 }
 
 bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vector<Sphere> &obstacles, bool DEBUG) {
+
+    Rectangle posture[5];
+
+
     float angle0[4] = {(float)configs[0].joint_angles[0], (float)configs[1].joint_angles[0], (float)configs[2].joint_angles[0], (float)configs[3].joint_angles[0]};
     float angle1[4] = {(float)configs[0].joint_angles[1], (float)configs[1].joint_angles[1], (float)configs[2].joint_angles[1], (float)configs[3].joint_angles[1]};
     float angle2[4] = {(float)configs[0].joint_angles[2], (float)configs[1].joint_angles[2], (float)configs[2].joint_angles[2], (float)configs[3].joint_angles[2]};
@@ -382,7 +386,24 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
 
     // float z_rotation_angle[4];
     float32x4_t v_z_rotation_angle = vsubq_f32(v_180, v_angle1);
-
+    
+    if(DEBUG){
+        vst1q_f32(top_center[0], v_top_center[0]);
+        vst1q_f32(top_center[1], v_top_center[1]);
+        vst1q_f32(top_center[2], v_top_center[2]);
+        vst1q_f32(bottom_center[0], v_bottom_center[0]);
+        vst1q_f32(bottom_center[1], v_bottom_center[1]);
+        vst1q_f32(bottom_center[2], v_bottom_center[2]);
+        posture[0].bottom_center.x = bottom_center[0][0];
+        posture[0].bottom_center.y = bottom_center[1][0];
+        posture[0].bottom_center.z = bottom_center[2][0];
+        posture[0].top_center.x = top_center[0][0];
+        posture[0].top_center.y = top_center[1][0];
+        posture[0].top_center.z = top_center[2][0];
+        posture[0].length = rods[0].length;
+        posture[0].width = rods[0].width;
+        posture[0].height = rods[0].height;
+    }
     // first rod
     bool result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 0, obstacles, DEBUG);
     if(result == false){
@@ -397,13 +418,48 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
     float32x4_t v_local_top_center[3] = {
-        vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle))),
-        vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle))),
+        vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(degrees_to_radians(v_xy_rotation_angle)))),
+        vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(degrees_to_radians(v_xy_rotation_angle)))),
         vmulq_f32(vdupq_n_f32(rods[1].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)))
     };
+    if(DEBUG){
+        float z_rotation_angle[4];
+        vst1q_f32(z_rotation_angle, v_z_rotation_angle);
+        std::cout << "second rod z_rotation_angle: " << z_rotation_angle[0] << std::endl;
+        float cos_z_rotation_angle[4];
+        vst1q_f32(cos_z_rotation_angle, Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)));
+        std::cout << "second rod cos_z_rotation_angle: " << cos_z_rotation_angle[0] << std::endl;
+        vst1q_f32(xy_rotation_angle, v_xy_rotation_angle);
+        std::cout << "second rod xy_rotation_angle: " << xy_rotation_angle[0] << std::endl;
+
+        float local_top_center[3][4];
+        vst1q_f32(local_top_center[0], v_local_top_center[0]);
+        vst1q_f32(local_top_center[1], v_local_top_center[1]);
+        vst1q_f32(local_top_center[2], v_local_top_center[2]);
+        std::cout << "second rod local_top_center: " << std::endl;
+        std::cout << "(" << local_top_center[0][0] << ", " << local_top_center[1][0] << ", " << local_top_center[2][0] << ")" << std::endl;
+    }
     v_top_center[0] = vaddq_f32(v_bottom_center[0], v_local_top_center[0]);
     v_top_center[1] = vaddq_f32(v_bottom_center[1], v_local_top_center[1]);
     v_top_center[2] = vaddq_f32(v_bottom_center[2], v_local_top_center[2]);
+
+    if(DEBUG){
+        vst1q_f32(top_center[0], v_top_center[0]);
+        vst1q_f32(top_center[1], v_top_center[1]);
+        vst1q_f32(top_center[2], v_top_center[2]);
+        vst1q_f32(bottom_center[0], v_bottom_center[0]);
+        vst1q_f32(bottom_center[1], v_bottom_center[1]);
+        vst1q_f32(bottom_center[2], v_bottom_center[2]);
+        posture[1].bottom_center.x = bottom_center[0][0];
+        posture[1].bottom_center.y = bottom_center[1][0];
+        posture[1].bottom_center.z = bottom_center[2][0];
+        posture[1].top_center.x = top_center[0][0];
+        posture[1].top_center.y = top_center[1][0];
+        posture[1].top_center.z = top_center[2][0];
+        posture[1].length = rods[1].length;
+        posture[1].width = rods[1].width;
+        posture[1].height = rods[1].height;
+    }
     result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 1, obstacles, DEBUG);
     if(result == false){
         if(DEBUG){
@@ -417,17 +473,30 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
     v_z_rotation_angle = vsubq_f32(v_z_rotation_angle, vsubq_f32(vdupq_n_f32(90.0f), v_angle2));
-    // v_local_top_center = {
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)))
-    // };
-    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[2].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle)));
-    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[2].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle)));
+    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[2].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(degrees_to_radians(v_xy_rotation_angle))));
+    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[2].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(degrees_to_radians(v_xy_rotation_angle))));
     v_local_top_center[2] = vmulq_f32(vdupq_n_f32(rods[2].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)));
     v_top_center[0] = vaddq_f32(v_bottom_center[0], v_local_top_center[0]);
     v_top_center[1] = vaddq_f32(v_bottom_center[1], v_local_top_center[1]);
     v_top_center[2] = vaddq_f32(v_bottom_center[2], v_local_top_center[2]);
+
+    if(DEBUG){
+        vst1q_f32(top_center[0], v_top_center[0]);
+        vst1q_f32(top_center[1], v_top_center[1]);
+        vst1q_f32(top_center[2], v_top_center[2]);
+        vst1q_f32(bottom_center[0], v_bottom_center[0]);
+        vst1q_f32(bottom_center[1], v_bottom_center[1]);
+        vst1q_f32(bottom_center[2], v_bottom_center[2]);
+        posture[2].bottom_center.x = bottom_center[0][0];
+        posture[2].bottom_center.y = bottom_center[1][0];
+        posture[2].bottom_center.z = bottom_center[2][0];
+        posture[2].top_center.x = top_center[0][0];
+        posture[2].top_center.y = top_center[1][0];
+        posture[2].top_center.z = top_center[2][0];
+        posture[2].length = rods[2].length;
+        posture[2].width = rods[2].width;
+        posture[2].height = rods[2].height;
+    }
     result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 2, obstacles, DEBUG);
     if(result == false){
         if(DEBUG){
@@ -441,20 +510,30 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
     v_z_rotation_angle = vsubq_f32(v_z_rotation_angle, vsubq_f32(v_angle3, vdupq_n_f32(90.0f)));
-    // v_local_top_center = {
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)))
-    // };
-    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[3].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle)));
-    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[3].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle)));
+    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[3].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(degrees_to_radians(v_xy_rotation_angle))));
+    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[3].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(degrees_to_radians(v_xy_rotation_angle))));
     v_local_top_center[2] = vmulq_f32(vdupq_n_f32(rods[3].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)));
-
-
-
     v_top_center[0] = vaddq_f32(v_bottom_center[0], v_local_top_center[0]);
     v_top_center[1] = vaddq_f32(v_bottom_center[1], v_local_top_center[1]);
     v_top_center[2] = vaddq_f32(v_bottom_center[2], v_local_top_center[2]);
+
+    if(DEBUG){
+        vst1q_f32(top_center[0], v_top_center[0]);
+        vst1q_f32(top_center[1], v_top_center[1]);
+        vst1q_f32(top_center[2], v_top_center[2]);
+        vst1q_f32(bottom_center[0], v_bottom_center[0]);
+        vst1q_f32(bottom_center[1], v_bottom_center[1]);
+        vst1q_f32(bottom_center[2], v_bottom_center[2]);
+        posture[3].bottom_center.x = bottom_center[0][0];
+        posture[3].bottom_center.y = bottom_center[1][0];
+        posture[3].bottom_center.z = bottom_center[2][0];
+        posture[3].top_center.x = top_center[0][0];
+        posture[3].top_center.y = top_center[1][0];
+        posture[3].top_center.z = top_center[2][0];
+        posture[3].length = rods[3].length;
+        posture[3].width = rods[3].width;
+        posture[3].height = rods[3].height;
+    }
     result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 3, obstacles, DEBUG);
     if(result == false){
         if(DEBUG){
@@ -467,26 +546,45 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
     v_bottom_center[0] = v_top_center[0];
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
-    // v_local_top_center = {
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle))),
-    //     vmulq_f32(vdupq_n_f32(rods[1].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)))
-    // };
-    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[4].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(v_xy_rotation_angle)));
-    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[4].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(v_xy_rotation_angle)));
+    v_local_top_center[0] = vmulq_f32(vdupq_n_f32(rods[4].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_cosf4_u10(degrees_to_radians(v_xy_rotation_angle))));
+    v_local_top_center[1] = vmulq_f32(vdupq_n_f32(rods[4].height), vmulq_f32(Sleef_cosf4_u10(degrees_to_radians(v_z_rotation_angle)), Sleef_sinf4_u10(degrees_to_radians(v_xy_rotation_angle))));
     v_local_top_center[2] = vmulq_f32(vdupq_n_f32(rods[4].height), Sleef_sinf4_u10(degrees_to_radians(v_z_rotation_angle)));
-
-
-
     v_top_center[0] = vaddq_f32(v_bottom_center[0], v_local_top_center[0]);
     v_top_center[1] = vaddq_f32(v_bottom_center[1], v_local_top_center[1]);
     v_top_center[2] = vaddq_f32(v_bottom_center[2], v_local_top_center[2]);
+
+    if(DEBUG){
+        vst1q_f32(top_center[0], v_top_center[0]);
+        vst1q_f32(top_center[1], v_top_center[1]);
+        vst1q_f32(top_center[2], v_top_center[2]);
+        vst1q_f32(bottom_center[0], v_bottom_center[0]);
+        vst1q_f32(bottom_center[1], v_bottom_center[1]);
+        vst1q_f32(bottom_center[2], v_bottom_center[2]);
+        posture[4].bottom_center.x = bottom_center[0][0];
+        posture[4].bottom_center.y = bottom_center[1][0];
+        posture[4].bottom_center.z = bottom_center[2][0];
+        posture[4].top_center.x = top_center[0][0];
+        posture[4].top_center.y = top_center[1][0];
+        posture[4].top_center.z = top_center[2][0];
+        posture[4].length = rods[4].length;
+        posture[4].width = rods[4].width;
+        posture[4].height = rods[4].height;
+    }
     result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 4, obstacles, DEBUG);
     if(result == false){
         if(DEBUG){
             std::cout << "Collision detected for 5th rod." << std::endl;
         }
         return false;
+    }
+
+    if(DEBUG){
+        for(int i=0; i<5; i++){
+            std::cout << "Rod " << i+1 << ": ";
+            std::cout << "Bottom Center: " << posture[i].bottom_center << ", Top Center: " << posture[i].top_center;
+            std::cout << ", Length: " << posture[i].length << ", Width: " << posture[i].width << ", Height: " << posture[i].height;
+            std::cout << std::endl;
+        }
     }
 
     return true; // No collision detected for all rods
