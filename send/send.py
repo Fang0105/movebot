@@ -1,6 +1,25 @@
 import serial
 import time
 import math
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-m",
+                    "--method",
+                    type=str,
+                    help="movebot or vamp")
+
+args = parser.parse_args()
+
+if args.method == "movebot":
+    print("Using movebot method")
+    method = "movebot"
+elif args.method == "vamp":
+    print("Using vamp method")
+    method = "vamp"
+else:
+    print("Invalid method specified. Use 'movebot' or 'vamp'.")
+    exit(1)
 
 # Open serial connection to Arduino
 ser = serial.Serial('/dev/serial0', 9600, timeout=1)
@@ -20,7 +39,7 @@ def send_angles(angles):
         send_a_number(str(num))
 
 
-f = open("../vamp/output/path.txt", mode="r")
+f = open(f"../{method}/output/path.txt", mode="r")
 
 for line in f.readlines():
     line = line.strip()
