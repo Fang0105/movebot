@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
     std::string arm_description_file = input_dir + "/" + "arm_description.txt";
     std::string start_end_file = input_dir + "/" + "start_end.txt";
     std::string output_file = output_dir + "/" + "path.txt";
+    std::string execution_time_file = output_dir + "/" + "execution_time.txt";
     std::string obstacles_file = input_dir + "/" + "obstacles.txt";
     int max_iterations = 1000;
     int reach_threshold = 5;
@@ -59,10 +60,13 @@ int main(int argc, char *argv[]) {
         obstacles_file = argv[4];   
     }
     if(argc > 5){
-        max_iterations = std::stoi(argv[5]);
+        execution_time_file = argv[5];   
     }
     if(argc > 6){
-        reach_threshold = std::stoi(argv[6]);
+        max_iterations = std::stoi(argv[6]);
+    }
+    if(argc > 7){
+        reach_threshold = std::stoi(argv[7]);
     }
 
     // ---------------------- Read arm information ----------------------
@@ -147,7 +151,8 @@ int main(int argc, char *argv[]) {
     // arm.printPosture(start);
 
 
-    
+    auto start_time = std::chrono::steady_clock::now();
+    auto MV_total_time = 0, FK_total_time = 0, CC_total_time = 0;
     Configuration current = start;
     int steps = 0;
     while(reach(current, goal, reach_threshold)==false && steps < max_iterations){
@@ -175,7 +180,13 @@ int main(int argc, char *argv[]) {
         //     // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
         //     continue;
         // }
-        if(!arm.motionValidation(qNearest, qNew, obstacles)){
+        auto MV_start_time = std::chrono::steady_clock::now();
+        validation_result result;
+        result = arm.motionValidation(qNearest, qNew, obstacles);
+        CC_total_time += result.CC_time;
+        FK_total_time += result.FK_time;
+        MV_total_time += get_elapsed_nanoseconds(MV_start_time);
+        if(!result.valid){
             // std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
             continue;
         }
@@ -195,6 +206,7 @@ int main(int argc, char *argv[]) {
         rrt.connect(qNearest, qNew);
         current = qNew;
     }
+    auto total_time = get_elapsed_nanoseconds(start_time);
 
     std::vector<Configuration> path = rrt.getPath(start, current);
     std::ofstream out;
@@ -218,6 +230,33 @@ int main(int argc, char *argv[]) {
     std::cout << "max_iterations: " << max_iterations << std::endl;
     std::cout << "reach_threshold: " << reach_threshold << std::endl;
 
+    // execution time 
+    out.open(execution_time_file);
+    if(out.fail()){
+        std::cerr << "Error opening output file: " << execution_time_file << std::endl;
+        return 1;
+    }
+    out << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
+    out << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
+    out << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
+    out << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+
+    out << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
+    out << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;
+    out << "CC ratio: " << (CC_total_time * 100.0 / total_time) << "%" << std::endl;
+    out.close();
+    std::cout << PURPLE << "Execution time saved to: " << NONE << execution_time_file << std::endl;
+
+    std::cout << "--------------------- Time Statistics --------------------" << std::endl;
+    std::cout << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+
+    std::cout << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
+    std::cout << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;
+    std::cout << "CC ratio: " << (CC_total_time * 100.0 / total_time) << "%" << std::endl;
+
     // arm.calculatePosture(goal);
     // arm.printPosture(goal);
     
@@ -234,16 +273,5 @@ int main(int argc, char *argv[]) {
     // std::vector<Configuration> tem(4, c);
     // arm.batchCollisionDetection(tem, obstacles, true);
 
-
-
-    
-
-
-
-
-
-
-
-    
     return 0;
 }

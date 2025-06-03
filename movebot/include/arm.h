@@ -24,9 +24,9 @@ class Arm{
 
         void printPosture(Configuration &config);
 
-        bool collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles);
+        validation_result collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles);
 
-        bool motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG = false);
+        validation_result motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG = false);
 };
 
 #endif

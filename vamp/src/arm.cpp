@@ -213,17 +213,19 @@ inline Configuration step_forward(Configuration &base, Configuration &direction,
     return result;
 }
 
-bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Sphere> &obstacles, bool DEBUG) {
+validation_result Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Sphere> &obstacles, bool DEBUG) {
     Configuration diff = B - A;
     std::vector<Configuration> configs(4);
+    validation_result result, temp;
+
     // 1~4
     configs[0] = step_forward(A, diff, 1);
     configs[1] = step_forward(A, diff, 2);
     configs[2] = step_forward(A, diff, 3);
     configs[3] = step_forward(A, diff, 4);
-    bool valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    result = batchCollisionDetection(configs, obstacles, DEBUG);
+    if(!result.valid){
+        return result;
     }
     
 
@@ -232,9 +234,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 6);
     configs[2] = step_forward(A, diff, 7);
     configs[3] = step_forward(A, diff, 8);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 9~12
@@ -242,9 +247,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 10);
     configs[2] = step_forward(A, diff, 11);
     configs[3] = step_forward(A, diff, 12);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 13~16
@@ -252,9 +260,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 14);
     configs[2] = step_forward(A, diff, 15);
     configs[3] = step_forward(A, diff, 16);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 17~20
@@ -262,9 +273,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 18);
     configs[2] = step_forward(A, diff, 19);
     configs[3] = step_forward(A, diff, 20);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 21~24
@@ -272,9 +286,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 22);
     configs[2] = step_forward(A, diff, 23);
     configs[3] = step_forward(A, diff, 24);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 25~28
@@ -282,9 +299,12 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 26);
     configs[2] = step_forward(A, diff, 27);
     configs[3] = step_forward(A, diff, 28);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
     // 29~32
@@ -292,12 +312,15 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Spher
     configs[1] = step_forward(A, diff, 30);
     configs[2] = step_forward(A, diff, 31);
     configs[3] = step_forward(A, diff, 32);
-    valid = batchCollisionDetection(configs, obstacles, DEBUG);
-    if(!valid){
-        return false;
+    temp = batchCollisionDetection(configs, obstacles, DEBUG);
+    result.FK_time += temp.FK_time;
+    result.CC_time += temp.CC_time;
+    result.valid = temp.valid;
+    if(!result.valid){
+        return result;
     }
 
-    return true;
+    return result;
 }
 
 bool Arm::batchSphereCollisionDetection(float32x4_t v_top_center[3], float32x4_t v_bottom_center[3], int rod_id, std::vector<Sphere> &obstacles, bool DEBUG) {
@@ -357,8 +380,9 @@ bool Arm::batchSphereCollisionDetection(float32x4_t v_top_center[3], float32x4_t
     return valid;
 }
 
-bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vector<Sphere> &obstacles, bool DEBUG) {
+validation_result Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vector<Sphere> &obstacles, bool DEBUG) {
 
+    validation_result result;
     Rectangle posture[5];
 
 
@@ -375,6 +399,7 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
     float32x4_t v_180 = vdupq_n_f32(180.0f);
 
     // z -x x -x y, 0-180
+    auto FK_start_time = std::chrono::steady_clock::now();
     float top_center[3][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {rods[0].height, rods[0].height, rods[0].height, rods[0].height}}; // {{x},{y},{z}}
     float bottom_center[3][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}; // {{x},{y},{z}}
     float32x4_t v_top_center[3] = {vld1q_f32(top_center[0]), vld1q_f32(top_center[1]), vld1q_f32(top_center[2])};
@@ -404,16 +429,20 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         posture[0].width = rods[0].width;
         posture[0].height = rods[0].height;
     }
+    result.FK_time = get_elapsed_nanoseconds(FK_start_time);
     // first rod
-    bool result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 0, obstacles, DEBUG);
-    if(result == false){
+    auto CC_start_time = std::chrono::steady_clock::now();
+    result.valid = batchSphereCollisionDetection(v_top_center, v_bottom_center, 0, obstacles, DEBUG);
+    result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+    if(result.valid == false){
         if(DEBUG){
             std::cout << "Collision detected for 1st rod." << std::endl;
         }
-        return false;
+        return result;
     }
     
     // second rod, -x
+    FK_start_time = std::chrono::steady_clock::now();
     v_bottom_center[0] = v_top_center[0];
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
@@ -460,15 +489,19 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         posture[1].width = rods[1].width;
         posture[1].height = rods[1].height;
     }
-    result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 1, obstacles, DEBUG);
-    if(result == false){
+    result.FK_time += get_elapsed_nanoseconds(FK_start_time);
+    CC_start_time = std::chrono::steady_clock::now();
+    result.valid = batchSphereCollisionDetection(v_top_center, v_bottom_center, 1, obstacles, DEBUG);
+    result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+    if(result.valid == false){
         if(DEBUG){
             std::cout << "Collision detected for 2nd rod." << std::endl;
         }
-        return false;
+        return result;
     }
 
     // third rod, x
+    FK_start_time = std::chrono::steady_clock::now();
     v_bottom_center[0] = v_top_center[0];
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
@@ -497,15 +530,19 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         posture[2].width = rods[2].width;
         posture[2].height = rods[2].height;
     }
-    result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 2, obstacles, DEBUG);
-    if(result == false){
+    result.FK_time += get_elapsed_nanoseconds(FK_start_time);
+    CC_start_time = std::chrono::steady_clock::now();
+    result.valid = batchSphereCollisionDetection(v_top_center, v_bottom_center, 2, obstacles, DEBUG);
+    result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+    if(result.valid == false){
         if(DEBUG){
             std::cout << "Collision detected for 3rd rod." << std::endl;
         }
-        return false;
+        return result;
     }
 
     // fourth rod, -x
+    FK_start_time = std::chrono::steady_clock::now();
     v_bottom_center[0] = v_top_center[0];
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
@@ -534,15 +571,19 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         posture[3].width = rods[3].width;
         posture[3].height = rods[3].height;
     }
-    result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 3, obstacles, DEBUG);
-    if(result == false){
+    result.FK_time += get_elapsed_nanoseconds(FK_start_time);
+    CC_start_time = std::chrono::steady_clock::now();
+    result.valid = batchSphereCollisionDetection(v_top_center, v_bottom_center, 3, obstacles, DEBUG);
+    result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+    if(result.valid == false){
         if(DEBUG){
             std::cout << "Collision detected for 4th rod." << std::endl;
         }
-        return false;
+        return result;
     }
 
     // fifth rod, y
+    FK_start_time = std::chrono::steady_clock::now();
     v_bottom_center[0] = v_top_center[0];
     v_bottom_center[1] = v_top_center[1];
     v_bottom_center[2] = v_top_center[2];
@@ -570,12 +611,15 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         posture[4].width = rods[4].width;
         posture[4].height = rods[4].height;
     }
-    result = batchSphereCollisionDetection(v_top_center, v_bottom_center, 4, obstacles, DEBUG);
-    if(result == false){
+    result.FK_time += get_elapsed_nanoseconds(FK_start_time);
+    CC_start_time = std::chrono::steady_clock::now();
+    result.valid = batchSphereCollisionDetection(v_top_center, v_bottom_center, 4, obstacles, DEBUG);
+    result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+    if(result.valid == false){
         if(DEBUG){
             std::cout << "Collision detected for 5th rod." << std::endl;
         }
-        return false;
+        return result;
     }
 
     if(DEBUG){
@@ -587,6 +631,6 @@ bool Arm::batchCollisionDetection(std::vector<Configuration> &configs, std::vect
         }
     }
 
-    return true; // No collision detected for all rods
+    return result; // No collision detected for all rods
 
 }

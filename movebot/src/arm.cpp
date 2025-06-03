@@ -189,22 +189,30 @@ void Arm::printPosture(Configuration &config) {
     std::cout << std::endl;
 }
 
-bool Arm::collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles) {
+validation_result Arm::collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles) {
+    validation_result result;
+    auto FK_start_time = std::chrono::steady_clock::now();
     calculatePosture(config);
+    result.FK_time = get_elapsed_nanoseconds(FK_start_time);
     for(auto &obstacle : obstacles){
         for(auto &rod : rods){
-            if(cuboidCuboidCollisionDetection(rod, obstacle)){
-                return true;
+            auto CC_start_time = std::chrono::steady_clock::now();
+            bool collision = cuboidCuboidCollisionDetection(rod, obstacle);
+            result.CC_time += get_elapsed_nanoseconds(CC_start_time);
+            if(collision){
+                return result;
             }
         }
     }
-    return false;
+    return result;
 }
 
-bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG) {
+validation_result Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG) {
     int checking_points_number = 32;
     Configuration diff = B - A;
-    bool valid = true;
+    // bool valid = true;
+    validation_result result, temp;
+    result.valid = true;
     for (int step = 1; step <= checking_points_number; ++step) {
         Configuration current = A;
         int joint_number = current.joint_number;
@@ -217,10 +225,13 @@ bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Recta
             std::cout << "Checking configuration: " << current << std::endl;
         }
         // 檢查這個中間姿態是否碰撞
-        if (collisionDetection(current, obstacles)) {
-            valid = false;
+        temp = collisionDetection(current, obstacles);
+        result.CC_time += temp.CC_time;
+        result.FK_time += temp.FK_time;
+        if (temp.valid) {
+            result.valid = false;
         }
     }
-    return valid;  // 全部合法
+    return result;  // 全部合法
     
 }

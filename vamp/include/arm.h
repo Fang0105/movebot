@@ -27,9 +27,9 @@ class Arm{
 
         bool collisionDetection(Configuration &config, std::vector<Rectangle> &obstacles);
 
-        bool motionValidation(Configuration &A, Configuration &B, std::vector<Sphere> &obstacles, bool DEBUG = false);
+        validation_result motionValidation(Configuration &A, Configuration &B, std::vector<Sphere> &obstacles, bool DEBUG = false);
 
-        bool batchCollisionDetection(std::vector<Configuration> &configs, std::vector<Sphere> &obstacles, bool DEBUG = false);
+        validation_result batchCollisionDetection(std::vector<Configuration> &configs, std::vector<Sphere> &obstacles, bool DEBUG = false);
 
         bool batchSphereCollisionDetection(float32x4_t v_top_center[3], float32x4_t v_bottom_center[3], int rod_id, std::vector<Sphere> &obstacles, bool DEBUG = false);
 };

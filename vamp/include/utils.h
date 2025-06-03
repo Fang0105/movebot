@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <arm_neon.h>
+#include <chrono>
 
 #define RED "\e[0;31m"
 #define NONE "\e[0m"
@@ -262,6 +263,20 @@ inline bool cuboidCuboidCollisionDetection(Rectangle& A, Rectangle& B) {
 
     return true; // 所有軸都重疊，表示有碰撞
 }
+
+inline auto get_elapsed_nanoseconds(const std::chrono::time_point<std::chrono::steady_clock> &start) {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count();
+}
+
+struct validation_result {
+    bool valid;
+    long long FK_time;
+    long long CC_time;
+
+    validation_result() : valid(false), FK_time(0), CC_time(0) {};
+    validation_result(bool valid, long long FK_time, long long CC_time)
+        : valid(valid), FK_time(FK_time), CC_time(CC_time) {}
+};
 
 // ---------------------------------------------------------------------
 
