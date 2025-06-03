@@ -251,7 +251,7 @@ struct validation_result {
     long long FK_time;
     long long CC_time;
 
-    validation_result() : valid(false), FK_time(0), CC_time(0) {};
+    validation_result() : valid(false), FK_time(0.0), CC_time(0.0) {};
     validation_result(bool valid, long long FK_time, long long CC_time)
         : valid(valid), FK_time(FK_time), CC_time(CC_time) {}
 };

@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
 
 
     auto start_time = std::chrono::steady_clock::now();
-    auto MV_total_time = 0, FK_total_time = 0, CC_total_time = 0;
+    auto MV_total_time = 0.0, FK_total_time = 0.0, CC_total_time = 0.0;
     Configuration current = start;
     int steps = 0;
     while(reach(current, goal, reach_threshold)==false && steps < max_iterations){

@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 
     // arm.printPosture(start);
     auto start_time = std::chrono::steady_clock::now();
-    auto CC_total_time = 0, FK_total_time = 0, MV_total_time = 0;
+    auto CC_total_time = 0.0, FK_total_time = 0.0, MV_total_time = 0.0;
     Configuration current = start;
     validation_result result;
     int steps = 0;
