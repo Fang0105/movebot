@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
         obstacles[i] = rect;
         // std::cout << rect;
     }
+    in.close();
     // ------------------------------------------------------------
     // std::cout << "++++++++++\n";
     // for(int i=0; i<obstacles.size(); i++){
