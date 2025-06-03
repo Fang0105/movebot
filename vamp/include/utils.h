@@ -190,6 +190,12 @@ struct Sphere{
     Point center;
     Sphere(float radius, Point center) : radius(radius), center(center) {}
     Sphere() : radius(1.0f), center(Point(0.0f, 0.0f, 0.0f)) {}
+
+    friend std::ostream &operator<<(std::ostream &os, const Sphere &sphere){
+        os << CYAN << "Radius = " << NONE << sphere.radius << std::endl;
+        os << CYAN << "Center = " << NONE << sphere.center << std::endl;
+        return os;
+    }
 };
 
 

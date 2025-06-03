@@ -132,11 +132,11 @@ int main(int argc, char *argv[]) {
     
     
     // ------------------------------------------------------------
-    // std::cout << "++++++++++\n";
-    // for(int i=0; i<obstacles.size(); i++){
-    //     std::cout << obstacles[i];
-    // }
-    // std::cout << "++++++++++\n";
+    std::cout << "++++++++++\n";
+    for(int i=0; i<obstacles.size(); i++){
+        std::cout << obstacles[i];
+    }
+    std::cout << "++++++++++\n";
 
     // if(arm.collisionDetection(start, obstacles)){
     //     std::cout << RED << BOLD << "Start configuration is in collision!" << NONE << std::endl;
@@ -173,8 +173,8 @@ int main(int argc, char *argv[]) {
         //     // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
         //     continue;
         // }
-        if(!arm.motionValidation(current, qNew, obstacles)){
-            std::cout << "qNew: " << qNew << " -> Motion validation failed!" << std::endl;
+        if(!arm.motionValidation(qNearest, qNew, obstacles)){
+            std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
             continue;
         }else{
             std::cout << "qNew: " << qNew << " -> Motion validation passed!" << std::endl;

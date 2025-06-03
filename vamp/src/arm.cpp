@@ -204,35 +204,20 @@ bool Arm::collisionDetection(Configuration &config, std::vector<Rectangle> &obst
 }
 
 inline Configuration step_forward(Configuration &base, Configuration &direction, int step) {
-    std::cout << "in step_forward" << std::endl;
     Configuration result(5);
-    std::cout << "A" << std::endl;
-    std::cout << "CHECKINGPOINTSNUMBER: " << CHECKINGPOINTSNUMBER << std::endl;
-    std::cout << "base.joint_angles[0]: " << base.joint_angles[0] << std::endl;
-    std::cout << "direction.joint_angles[0]: " << direction.joint_angles[0] << std::endl;
-    std::cout << "step: " << step << std::endl;
     result.joint_angles[0] = base.joint_angles[0] + std::round((double)(direction.joint_angles[0]) * step / CHECKINGPOINTSNUMBER);
-    std::cout << "B" << std::endl;
     result.joint_angles[1] = base.joint_angles[1] + std::round((double)(direction.joint_angles[1]) * step / CHECKINGPOINTSNUMBER);
-    std::cout << "C" << std::endl;
     result.joint_angles[2] = base.joint_angles[2] + std::round((double)(direction.joint_angles[2]) * step / CHECKINGPOINTSNUMBER);
-    std::cout << "D" << std::endl;
     result.joint_angles[3] = base.joint_angles[3] + std::round((double)(direction.joint_angles[3]) * step / CHECKINGPOINTSNUMBER);
-    std::cout << "E" << std::endl;
     result.joint_angles[4] = base.joint_angles[4] + std::round((double)(direction.joint_angles[4]) * step / CHECKINGPOINTSNUMBER);
-    std::cout << "(step_forward) base: " << base << std::endl;
-    std::cout << "(step_forward) direction: " << direction << std::endl;
-    std::cout << "(step_forward) result: " << result << std::endl;
     return result;
 }
 
 bool Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Sphere> &obstacles, bool DEBUG) {
     Configuration diff = B - A;
-    std::cout << "(motionValidation) diff: " << diff << std::endl;
     std::vector<Configuration> configs(4);
     // 1~4
     configs[0] = step_forward(A, diff, 1);
-    std::cout << "(motionValidation) configs[0]: " << configs[0] << std::endl;
     configs[1] = step_forward(A, diff, 2);
     configs[2] = step_forward(A, diff, 3);
     configs[3] = step_forward(A, diff, 4);

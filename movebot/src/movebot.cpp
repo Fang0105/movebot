@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
         //     // std::cout << "qNew: " << qNew << " -> Collision detected!" << std::endl;
         //     continue;
         // }
-        if(!arm.motionValidation(current, qNew, obstacles)){
+        if(!arm.motionValidation(qNearest, qNew, obstacles)){
             // std::cout << "qNew: " << qNew << " -> Motion validation failed!" << std::endl;
             continue;
         }
