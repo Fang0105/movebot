@@ -1,0 +1,22 @@
+CXX = g++
+CXXFLAGS = -Wall -O3 -std=c++17 -Iinclude -mcpu=cortex-a72
+LDFLAGS = -lsleef
+
+TARGET = vamp
+SRC_DIR = src
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_DIR = obj
+OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
+DEP = $(OBJ:.o=.d)
+
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
+
+-include $(DEP)
+
+clean:
+	rm -rf $(OBJ_DIR) $(TARGET)
