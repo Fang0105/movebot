@@ -9,10 +9,11 @@
 
 RRT rrt;
 Arm arm;
+int random_seed;
 
 Configuration sampleAConfiguration(Configuration &goal){
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    // static std::random_device rd;
+    static std::mt19937 gen(random_seed);
 
     std::uniform_int_distribution<int> toward_goal(0, 100);
     if(toward_goal(gen) <= 5){
@@ -67,6 +68,11 @@ int main(int argc, char *argv[]) {
     }
     if(argc > 7){
         reach_threshold = std::stoi(argv[7]);
+    }
+    if(argc > 8){
+        random_seed = std::stoi(argv[8]);
+    } else {
+        random_seed = 50;
     }
 
     // ---------------------- Read arm information ----------------------

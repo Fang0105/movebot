@@ -200,6 +200,7 @@ validation_result Arm::collisionDetection(Configuration &config, std::vector<Rec
             bool collision = cuboidCuboidCollisionDetection(rod, obstacle);
             result.CC_time += get_elapsed_nanoseconds(CC_start_time);
             if(collision){
+                result.valid = true;
                 return result;
             }
         }

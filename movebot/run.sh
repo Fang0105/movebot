@@ -14,6 +14,8 @@ obstacles_file="obstacles.txt"
 max_iterations=1000
 reach_threshold=2
 
+rng_seed=100
+
 set -x
 
-./movebot ${input_dir}/${arm_description_file} ${input_dir}/${start_end_file} ${output_dir}/${path_file} ${input_dir}/${obstacles_file} ${output_dir}/${ExecutionTime_file} ${max_iterations} ${reach_threshold}
+./movebot ${input_dir}/${arm_description_file} ${input_dir}/${start_end_file} ${output_dir}/${path_file} ${input_dir}/${obstacles_file} ${output_dir}/${ExecutionTime_file} ${max_iterations} ${reach_threshold} ${rng_seed}
