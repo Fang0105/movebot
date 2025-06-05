@@ -25,7 +25,7 @@ ExecutionTime_file="execution_time.txt"
 
 obstacles_file="obstacles.txt"
 
-max_iterations=1000
+max_iterations=10000
 reach_threshold=2
 rng_seed=100
 # if [ -z "$3" ]; then

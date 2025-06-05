@@ -164,6 +164,7 @@ int main(int argc, char *argv[]) {
     Configuration current = start;
     validation_result result;
     int steps = 0;
+    int count = 0;
     while(reach(current, goal, reach_threshold)==false && steps < max_iterations){
         Configuration qRandom = sampleAConfiguration(goal);
         Configuration qNearest = rrt.findNearest(qRandom);
@@ -180,6 +181,12 @@ int main(int argc, char *argv[]) {
             double step = ((double)diff.joint_angles[i] / norm) * rrt.step_size;
             int moved = std::round(step);
             qNew.joint_angles[i] = qNearest.joint_angles[i] + moved;
+            // clamping the joint angles to the range
+            if(qNew.joint_angles[i] < arm.joint_angles_range[i].first){
+                qNew.joint_angles[i] = arm.joint_angles_range[i].first;
+            }else if(qNew.joint_angles[i] > arm.joint_angles_range[i].second){
+                qNew.joint_angles[i] = arm.joint_angles_range[i].second;
+            }
         }
 
         // if(arm.collisionDetection(qNew, obstacles)){
@@ -188,12 +195,16 @@ int main(int argc, char *argv[]) {
         // }
         auto MV_start_time = std::chrono::steady_clock::now();
         result = arm.motionValidation(qNearest, qNew, obstacles);
+        count++;
         FK_total_time += result.FK_time;
         CC_total_time += result.CC_time;
         MV_total_time += get_elapsed_nanoseconds(MV_start_time);
         if(!result.valid){
-            // std::cout << "qNew: " << qNew << " -> Motion validation failed!" << std::endl;
+            // std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
             continue;
+        }else{
+            // std::cout << GREEN << "qNew: " << qNew << " -> Motion validation passed!" << NONE << std::endl;
+            // arm.printPosture(qNew);
         }
 
         if(rrt.isExist(qNew)){
@@ -241,10 +252,14 @@ int main(int argc, char *argv[]) {
         std::cerr << "Error opening output file: " << execution_time_file << std::endl;
         return 1;
     }
+    auto MV_avg_time = MV_total_time / count;
+    auto FK_avg_time = FK_total_time / count;
+    auto CC_avg_time = CC_total_time / count;
+
     out << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
-    out << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
-    out << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
-    out << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+    out << "Motion validation avg time: " << MV_avg_time / 1000000.0 << " ms" << std::endl;
+    out << "Forward kinematic avg time: " << FK_avg_time / 1000000.0 << " ms" << std::endl;
+    out << "Collision check avg time: " << CC_avg_time / 1000000.0 << " ms" << std::endl;
 
     out << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
     out << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;
@@ -254,9 +269,9 @@ int main(int argc, char *argv[]) {
 
     std::cout << "--------------------- Time Statistics --------------------" << std::endl;
     std::cout << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Motion validation avg time: " << MV_avg_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Forward kinematic avg time: " << FK_avg_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Collision check avg time: " << CC_avg_time / 1000000.0 << " ms" << std::endl;
 
     std::cout << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
     std::cout << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;

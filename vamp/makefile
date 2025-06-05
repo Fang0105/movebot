@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -O3 -std=c++17 -Iinclude -mcpu=cortex-a72
+CXXFLAGS = -Wall -std=c++17 -Iinclude -mcpu=cortex-a72
 LDFLAGS = -lsleef
 
 TARGET = vamp

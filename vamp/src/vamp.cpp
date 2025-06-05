@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
     auto start_time = std::chrono::steady_clock::now();
     auto MV_total_time = 0.0, FK_total_time = 0.0, CC_total_time = 0.0;
     Configuration current = start;
-    int steps = 0;
+    int steps = 0, count = 0;
     while(reach(current, goal, reach_threshold)==false && steps < max_iterations){
         // std::cout << "Iteration: " << steps << std::endl;
         Configuration qRandom = sampleAConfiguration(goal);
@@ -189,12 +189,15 @@ int main(int argc, char *argv[]) {
         auto MV_start_time = std::chrono::steady_clock::now();
         validation_result result;
         result = arm.motionValidation(qNearest, qNew, obstacles);
+        count++;
         CC_total_time += result.CC_time;
         FK_total_time += result.FK_time;
         MV_total_time += get_elapsed_nanoseconds(MV_start_time);
         if(!result.valid){
             // std::cout << RED << "qNew: " << qNew << " -> Motion validation failed!" << NONE << std::endl;
             continue;
+        }else{
+            // std::cout << GREEN << "qNew: " << qNew << " -> Motion validation passed!" << NONE << std::endl;
         }
 
         if(rrt.isExist(qNew)){
@@ -242,10 +245,15 @@ int main(int argc, char *argv[]) {
         std::cerr << "Error opening output file: " << execution_time_file << std::endl;
         return 1;
     }
+
+    auto MV_avg_time = MV_total_time / count;
+    auto FK_avg_time = FK_total_time / count;
+    auto CC_avg_time = CC_total_time / count;
+
     out << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
-    out << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
-    out << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
-    out << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+    out << "Motion validation avg time: " << MV_avg_time / 1000000.0 << " ms" << std::endl;
+    out << "Forward kinematic avg time: " << FK_avg_time / 1000000.0 << " ms" << std::endl;
+    out << "Collision check avg time: " << CC_avg_time / 1000000.0 << " ms" << std::endl;
 
     out << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
     out << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;
@@ -255,9 +263,9 @@ int main(int argc, char *argv[]) {
 
     std::cout << "--------------------- Time Statistics --------------------" << std::endl;
     std::cout << "Total time: " << total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Motion validation total time: " << MV_total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Forward kinematic total time: " << FK_total_time / 1000000.0 << " ms" << std::endl;
-    std::cout << "Collision check total time: " << CC_total_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Motion validation avg time: " << MV_avg_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Forward kinematic avg time: " << FK_avg_time / 1000000.0 << " ms" << std::endl;
+    std::cout << "Collision check avg time: " << CC_avg_time / 1000000.0 << " ms" << std::endl;
 
     std::cout << "MV ratio: " << (MV_total_time * 100.0 / total_time) << "%" << std::endl;
     std::cout << "FK ratio: " << (FK_total_time * 100.0 / total_time) << "%" << std::endl;

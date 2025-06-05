@@ -80,7 +80,7 @@ void loop() {
 
         if(number == 300){
           end = true;
-          wave();
+          // wave();
         }
 
         angles[count++] = number;
