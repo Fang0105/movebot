@@ -32,16 +32,17 @@ def read_and_average_times(folder):
     return mv_avg, fk_avg, cc_avg
 
 folders = {
-    "vamp": "vamp/output",
-    "movebot": "movebot/output"
+    "VAMP": "vamp/output",
+    "Baseline": "movebot/output"
 }
 
-labels = ["Motion validation", "Forward kinematic", "Collision check"]
+labels = ["motion validation", "forward kinematic", "collision check"]
 x = range(len(labels))
 bar_width = 0.35
 mv_avgs = []
 fk_avgs = []
 cc_avgs = []
+colors = ["#1e90ff", "#40e0d0"]
 
 for label, folder in folders.items():
     mv_avg, fk_avg, cc_avg = read_and_average_times(folder)
@@ -51,11 +52,11 @@ for label, folder in folders.items():
 
 fig, ax = plt.subplots()
 for i, label in enumerate(folders.keys()):
-    ax.bar([p + i * bar_width for p in x], [mv_avgs[i], fk_avgs[i], cc_avgs[i]], width=bar_width, label=label)
+    ax.bar([p + i * bar_width for p in x], [mv_avgs[i], fk_avgs[i], cc_avgs[i]], width=bar_width, label=label, color=colors[i])
 
 print(f"VAMP - Motion validation avg: {mv_avgs[0]} ms, Forward kinematic avg: {fk_avgs[0]} ms, Collision check avg: {cc_avgs[0]} ms")
 print(f"Movebot - Motion validation avg: {mv_avgs[1]} ms, Forward kinematic avg: {fk_avgs[1]} ms, Collision check avg: {cc_avgs[1]} ms")
-print(f"difference: Motion validation: x{mv_avgs[1] / mv_avgs[0]} times, Forward kinematic: x{fk_avgs[1] / fk_avgs[0]} times, Collision check: x{cc_avgs[1] / cc_avgs[0]} times")
+print(f"difference: Motion validation: x{(mv_avgs[1] / mv_avgs[0]).6f}, Forward kinematic: x{fk_avgs[1] / fk_avgs[0]}, Collision check: x{cc_avgs[1] / cc_avgs[0]}")
 
 ax.set_xticks([p + bar_width / 2 for p in x])
 ax.set_xticklabels(labels)
