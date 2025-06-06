@@ -56,7 +56,7 @@ for i, label in enumerate(folders.keys()):
 
 print(f"VAMP - Motion validation avg: {mv_avgs[0]} ms, Forward kinematic avg: {fk_avgs[0]} ms, Collision check avg: {cc_avgs[0]} ms")
 print(f"Movebot - Motion validation avg: {mv_avgs[1]} ms, Forward kinematic avg: {fk_avgs[1]} ms, Collision check avg: {cc_avgs[1]} ms")
-print(f"difference: Motion validation: x{(mv_avgs[1] / mv_avgs[0]).6f}, Forward kinematic: x{fk_avgs[1] / fk_avgs[0]}, Collision check: x{cc_avgs[1] / cc_avgs[0]}")
+print(f"difference: Motion validation: x{(mv_avgs[1] / mv_avgs[0])}, Forward kinematic: x{fk_avgs[1] / fk_avgs[0]}, Collision check: x{cc_avgs[1] / cc_avgs[0]}")
 
 ax.set_xticks([p + bar_width / 2 for p in x])
 ax.set_xticklabels(labels)

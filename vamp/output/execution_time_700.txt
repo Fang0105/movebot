@@ -1,7 +1,7 @@
-Total time: 4385.02 ms
-Motion validation avg time: 0.13521 ms
-Forward kinematic avg time: 0.0184233 ms
-Collision check avg time: 0.0733682 ms
-MV ratio: 12.0933%
-FK ratio: 1.64779%
-CC ratio: 6.56212%
+Total time: 4133.66 ms
+Motion validation avg time: 0.135773 ms
+Forward kinematic avg time: 0.0179784 ms
+Collision check avg time: 0.0757361 ms
+MV ratio: 12.3927%
+FK ratio: 1.64098%
+CC ratio: 6.91282%

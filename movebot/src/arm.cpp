@@ -209,7 +209,7 @@ validation_result Arm::collisionDetection(Configuration &config, std::vector<Rec
 }
 
 validation_result Arm::motionValidation(Configuration &A, Configuration &B, std::vector<Rectangle> &obstacles, bool DEBUG) {
-    int checking_points_number = 16;
+    int checking_points_number = 32;
     Configuration diff = B - A;
     // bool valid = true;
     validation_result result, temp;

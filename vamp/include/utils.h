@@ -19,7 +19,7 @@
 #define RAD(X) (static_cast<float>(X) * PI / 180.0)
 #define DEG(X) ((X) * 180.0 / PI)
 
-#define CHECKINGPOINTSNUMBER 16
+#define CHECKINGPOINTSNUMBER 32
 
 struct Configuration{
     int joint_number;
